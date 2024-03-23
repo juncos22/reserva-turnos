@@ -1,24 +1,80 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTurnos } from "../hooks/useTurnos";
-import { CrearTurnoDTO } from "../interfaces/dtos/turno.dto";
+import { ActualizarTurnoDTO, CrearTurnoDTO } from "../interfaces/dtos/turno.dto";
 
-export default function FormularioReserva() {
-  const [reserva, setReserva] = useState<CrearTurnoDTO>({
+type props = {
+  formMode: { type: string, turnoId: number }
+}
+export default function FormularioReserva({ formMode }: props) {
+  const { traerTurno, turnoState } = useTurnos();
+  const [reserva, setReserva] = useState<CrearTurnoDTO | ActualizarTurnoDTO>({
     title: "",
     date: "",
     description: "",
   });
-  const { guardarTurno } = useTurnos();
+
+  const { guardarTurno, actualizarTurno } = useTurnos();
+  const handleReserva = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setReserva((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (formMode.type === 'add') {
+      guardarTurno(reserva as CrearTurnoDTO);
+      setReserva({ title: '', date: '', description: '' })
+    } else {
+      console.log(reserva, formMode.turnoId);
+
+      actualizarTurno(formMode.turnoId, reserva as ActualizarTurnoDTO)
+      setReserva(prev => ({ ...prev, title: '', date: '', description: '' }))
+    }
+  }
+  // const renderInput = () => {
+  //   if (!isAddMode) return (
+  //     <input
+  //       type="text"
+  //       id="title"
+  //       value={turnoEdit?.title}
+  //       onChange={handleReserva}
+  //       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+  //       placeholder={turnoEdit?.title}
+  //       required
+  //     />
+  //   )
+  //   return (
+  //     <input
+  //       type="text"
+  //       id="title"
+  //       name="title"
+  //       value={reserva.title}
+  //       onChange={handleReserva}
+  //       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+  //       placeholder="Cita con..."
+  //       required
+  //     />
+  //   )
+  // }
+  const getTurno = () => {
+    traerTurno(formMode.turnoId);
+    if (turnoState.turno) {
+      setReserva(prev => ({ ...prev, ...turnoState.turno as ActualizarTurnoDTO }))
+    }
+  }
+  useEffect(() => {
+    if (formMode.type === 'edit') {
+      getTurno();
+    }
+  }, [formMode.type, formMode.turnoId, turnoState.turno?.id, reserva.title])
+
+
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        guardarTurno(reserva);
-      }}
+      onSubmit={onSubmit}
       className="flex flex-col items-start justify-center gap-y-5 border border-indigo-500 rounded-md px-10 py-5"
     >
       <h3 className="text-lg font-medium text-indigo-300">
-        Agenda tu cita aquí
+        {formMode.type === 'add' ? 'Agendá' : 'Modificá'} tu cita aquí
       </h3>
       <div>
         <label
@@ -32,9 +88,7 @@ export default function FormularioReserva() {
           id="title"
           name="title"
           value={reserva.title}
-          onChange={(e) =>
-            setReserva((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-          }
+          onChange={handleReserva}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Cita con..."
           required
@@ -54,18 +108,13 @@ export default function FormularioReserva() {
         </div>
 
         <input
-          datepicker-format="dd/mm/yyyy"
+          datepicker-format="yyyy-MM-ddThh:mm"
           type="datetime-local"
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Elegí la fecha que te convenga(*)"
           name="date"
           value={reserva.date}
-          onChange={(e) => {
-            setReserva((prev) => ({
-              ...prev,
-              [e.target.name]: e.target.value,
-            }));
-          }}
+          onChange={handleReserva}
         />
       </div>
       <div>
@@ -81,9 +130,7 @@ export default function FormularioReserva() {
           id="description"
           name="description"
           value={reserva.description}
-          onChange={(e) =>
-            setReserva((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-          }
+          onChange={handleReserva}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         />
       </div>
@@ -91,7 +138,7 @@ export default function FormularioReserva() {
         className="bg-blue-500 rounded-full ml-auto text-white px-5 py-2 font-medium transition-colors hover:bg-indigo-800"
         type="submit"
       >
-        Agendar
+        {formMode.type === 'edit' ? 'Guardar Cambios' : 'Agendar'}
       </button>
     </form>
   );

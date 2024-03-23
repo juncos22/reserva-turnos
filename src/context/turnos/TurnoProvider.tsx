@@ -32,8 +32,11 @@ export default function TurnoProvider({ children }: TurnoProviderProps) {
     }
 
     const traerTurno = async (id: number) => {
-        const res = await api.get(`/turnos/${id}`)
-        console.log(res.data);
+        const res = await api.get(`/turnos/${id}`, {
+            headers: {
+                Authorization: `Token ${localStorage.getItem('token') || '41708e23493461a501f131c2b39d9904d8d15a6d'}`,
+            }
+        })
         dispatch({ type: TurnoActions.TRAER_TURNO, payload: res.data.turno as Turno })
     }
     const eliminarTurno = async (id: number) => {

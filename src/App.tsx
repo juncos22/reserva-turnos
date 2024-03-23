@@ -1,3 +1,4 @@
+import { useState } from "react";
 import CustomAlert from "./components/CustomAlert";
 import FormularioReserva from "./components/FormularioReserva";
 import TurnoList from "./components/TurnoList";
@@ -5,7 +6,11 @@ import { useTurnos } from "./hooks/useTurnos";
 
 function App() {
   const { turnoState } = useTurnos();
+  const [formMode, setFormMode] = useState({ type: "add", turnoId: 0 })
 
+  const handleSelectTurno = (turnoId: number) => {
+    setFormMode(prev => ({ ...prev, type: 'edit', turnoId }))
+  }
   return (
     <div className="flex items-start justify-evenly gap-x-5 flex-wrap">
       <div className="flex flex-col items-center justify-center gap-y-5 mx-3">
@@ -14,12 +19,12 @@ function App() {
         </h3>
         {
           (turnoState.status === 200 || turnoState.status === 201) && (
-            <CustomAlert color="green" message="Reserva agendada!" />
+            <CustomAlert color="green" message={`Turno ${formMode.type === 'add' ? 'guardado' : 'modificado'}`} />
           )
         }
-        <FormularioReserva />
+        <FormularioReserva formMode={formMode} />
       </div>
-      <TurnoList />
+      <TurnoList onSelectTurno={handleSelectTurno} />
     </div>
   );
 }

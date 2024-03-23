@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner';
 import ConfirmAlert from './ConfirmAlert';
 
-
-export default function TurnoList() {
+type TurnoListProps = {
+    onSelectTurno: (id: number) => void
+}
+export default function TurnoList({ onSelectTurno }: TurnoListProps) {
     const { turnoState, traerTurnos, eliminarTurno } = useTurnos();
     const [showAlert, setShowAlert] = useState(false);
     const [turnoId, setTurnoId] = useState(0)
@@ -13,6 +15,7 @@ export default function TurnoList() {
     useEffect(() => {
         traerTurnos()
     }, [])
+
     return (
         <div className='flex flex-col items-center gap-y-5'>
             {
@@ -34,10 +37,10 @@ export default function TurnoList() {
                 {turnoState.cargando && (
                     <LoadingSpinner message='Cargando turnos' />
                 )}
-                <div className='grid gap-x-3 grid-cols-1 sm:grid-cols-2 mt-5'>
+                <div className='grid gap-x-3 grid-cols-2 mt-5'>
                     {
                         turnoState.turnos.map(turno => (
-                            <TurnoCard turno={turno} key={turno.id} onDelete={(id) => {
+                            <TurnoCard onSelect={onSelectTurno} turno={turno} key={turno.id} onDelete={(id) => {
                                 setTurnoId(id)
                                 setShowAlert(true)
                             }} />

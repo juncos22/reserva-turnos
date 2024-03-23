@@ -6,13 +6,14 @@
 ### Casos de Uso
 - USUARIO:
   - [ ] Registrarse
-  - [ ] Iniciar Sesión
+  - [x] Iniciar Sesión
+  - [x] Manejo de Sesión
 
 - TURNOS:
   - [x] Agendar Turno
   - [x] Visualizar turnos por usuario
   - [x] Eliminar Turno
-  - [ ] Actualizar Turno 
+  - [x] Actualizar Turno 
 
 ### CAPTURA
 ![alt text](image-1.png)
