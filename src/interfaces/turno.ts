@@ -8,7 +8,8 @@ export interface TurnoState {
     turnos: Turno[]
     turno?: Turno
     cargando: boolean
-    status: number
+    mensaje?: string
+    error?: string
 }
 export enum TurnoActions {
     TRAER_TURNOS = 'TRAER_TURNOS',
@@ -16,10 +17,11 @@ export enum TurnoActions {
     GUARDAR_TURNO = 'GUARDAR_TURNO',
     ELIMINAR_TURNO = 'ELIMINAR_TURNO',
     ACTUALIZAR_TURNO = 'ACTUALIZAR_TURNO',
-    CARGANDO = 'CARGANDO'
+    CARGANDO = 'CARGANDO',
+    BAD_REQUEST = 'BAD_REQUEST',
 }
 
 export interface TurnoAction {
     type: TurnoActions;
-    payload?: Turno[] | Turno | number;
+    payload?: Turno[] | Turno | string;
 }

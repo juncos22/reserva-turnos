@@ -5,7 +5,7 @@
 
 ### Casos de Uso
 - USUARIO:
-  - [ ] Registrarse
+  - [x] Registrarse
   - [x] Iniciar Sesión
   - [x] Manejo de Sesión
 

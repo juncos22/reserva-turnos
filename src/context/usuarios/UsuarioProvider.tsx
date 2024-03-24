@@ -13,17 +13,27 @@ export const UsuarioProvider = ({ children }: UsuarioProviderProps) => {
     const [state, dispatch] = useReducer(UsuarioReducer, initialState)
 
     const register = async (registerUser: RegisterUserDTO) => {
-        dispatch({ type: UsuarioActions.CARGANDO })
-        const res = await api.post('/auth/register', registerUser)
-        console.log(res);
+        try {
+            dispatch({ type: UsuarioActions.CARGANDO })
+            const res = await api.post('/auth/register', registerUser)
+            console.log(res);
 
-        dispatch({ type: UsuarioActions.REGISTER, payload: res.data.token })
+            dispatch({ type: UsuarioActions.REGISTER, payload: res.data.token })
+        } catch (error) {
+            console.log(error);
+            dispatch({ type: UsuarioActions.BAD_REQUEST, payload: "No se pudo realizar el registro" })
+        }
     }
     const login = async (loginUser: LoginUserDTO) => {
-        dispatch({ type: UsuarioActions.CARGANDO })
-        const res = await api.post('/auth/login', loginUser)
-        console.log(res);
-        dispatch({ type: UsuarioActions.LOGIN, payload: res.data.token })
+        try {
+            dispatch({ type: UsuarioActions.CARGANDO })
+            const res = await api.post('/auth/login', loginUser)
+            console.log(res);
+            dispatch({ type: UsuarioActions.LOGIN, payload: res.data.token })
+        } catch (error) {
+            console.log(error);
+            dispatch({ type: UsuarioActions.BAD_REQUEST, payload: 'No se pudo realizar el ingreso' })
+        }
     }
     const logout = () => {
         dispatch({ type: UsuarioActions.LOGOUT })

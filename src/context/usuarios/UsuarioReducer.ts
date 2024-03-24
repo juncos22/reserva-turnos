@@ -19,6 +19,12 @@ export const UsuarioReducer = (state = initialState, action: UsuarioAction): Usu
                 ...state,
                 cargando: true
             }
+        case UsuarioActions.BAD_REQUEST:
+            return {
+                ...state,
+                error: payload,
+                cargando: false
+            }
         default:
             return state
     }

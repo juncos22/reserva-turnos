@@ -1,34 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { useTurnos } from "../hooks/useTurnos";
 import { ActualizarTurnoDTO, CrearTurnoDTO } from "../interfaces/dtos/turno.dto";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type props = {
   formMode: { type: string, turnoId: number }
 }
 export default function FormularioReserva({ formMode }: props) {
-  const { traerTurno, turnoState } = useTurnos();
+  const { traerTurno, turnoState, guardarTurno, actualizarTurno } = useTurnos();
   const [reserva, setReserva] = useState<CrearTurnoDTO | ActualizarTurnoDTO>({
     title: "",
     date: "",
     description: "",
   });
+  const [formEdit, setFormEdit] = useState({ title: '', date: '', description: '' })
 
-  const { guardarTurno, actualizarTurno } = useTurnos();
   const handleReserva = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setReserva((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    if (formMode.type === 'add') {
+      // console.log(reserva);
+      setReserva(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    } else {
+      // console.log(formEdit);
+      setFormEdit(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    }
+
   }
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formMode.type === 'add') {
+      // console.log(reserva);
       guardarTurno(reserva as CrearTurnoDTO);
-      setReserva({ title: '', date: '', description: '' })
     } else {
-      console.log(reserva, formMode.turnoId);
-
-      actualizarTurno(formMode.turnoId, reserva as ActualizarTurnoDTO)
-      setReserva(prev => ({ ...prev, title: '', date: '', description: '' }))
+      // console.log(formEdit);
+      actualizarTurno(formMode.turnoId, formEdit as ActualizarTurnoDTO)
     }
+    setReserva(prev => ({ ...prev, title: '', date: '', description: '' }))
   }
   // const renderInput = () => {
   //   if (!isAddMode) return (
@@ -62,7 +69,7 @@ export default function FormularioReserva({ formMode }: props) {
     }
   }
   useEffect(() => {
-    if (formMode.type === 'edit') {
+    if (formMode.type === 'edit' && formMode.turnoId !== 0) {
       getTurno();
     }
   }, [formMode.type, formMode.turnoId, turnoState.turno?.id, reserva.title])
@@ -81,17 +88,16 @@ export default function FormularioReserva({ formMode }: props) {
           htmlFor="title"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
         >
-          Titulo (*)
+          Titulo {`(*)`}
         </label>
         <input
           type="text"
           id="title"
           name="title"
-          value={reserva.title}
-          onChange={handleReserva}
+          value={formMode.type === 'add' ? reserva.title : formEdit.title}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Cita con..."
-          required
+          placeholder={formMode.type === 'edit' && reserva.title ? reserva.title : "Cita con..."}
+          onChange={handleReserva}
         />
       </div>
       <div className="relative max-w-md">
@@ -111,9 +117,9 @@ export default function FormularioReserva({ formMode }: props) {
           datepicker-format="yyyy-MM-ddThh:mm"
           type="datetime-local"
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Elegí la fecha que te convenga(*)"
+          // placeholder={formMode.type === 'edit' ? reserva.date : "Elegí la fecha que te convenga(*)"}
           name="date"
-          value={reserva.date}
+          value={formMode.type === 'add' ? reserva.date : formEdit.date}
           onChange={handleReserva}
         />
       </div>
@@ -129,17 +135,24 @@ export default function FormularioReserva({ formMode }: props) {
           cols={28}
           id="description"
           name="description"
-          value={reserva.description}
+          value={formMode.type === 'add' ? reserva.description : formEdit.description}
+          placeholder={formMode.type === 'edit' && reserva.description ? reserva.description : 'Agrega un comentario adicional'}
           onChange={handleReserva}
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         />
       </div>
-      <button
-        className="bg-blue-500 rounded-full ml-auto text-white px-5 py-2 font-medium transition-colors hover:bg-indigo-800"
-        type="submit"
-      >
-        {formMode.type === 'edit' ? 'Guardar Cambios' : 'Agendar'}
-      </button>
+      {
+        turnoState.cargando ? (
+          <LoadingSpinner message={`${formMode.type === 'edit' ? 'Modificando' : 'Guardando'} turno...`} />
+        ) : (
+          <button
+            className="bg-blue-500 rounded-full ml-auto text-white px-5 py-2 font-medium transition-colors hover:bg-indigo-800"
+            type="submit"
+          >
+            {formMode.type === 'edit' ? 'Guardar Cambios' : 'Agendar Turno'}
+          </button>
+        )
+      }
     </form>
   );
 }
